@@ -1,0 +1,90 @@
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("gcookbook")
+install.packages("readr")
+
+library(dplyr)
+library(ggplot2) 
+library(gcookbook)
+library(readr)
+library(ggrepel)
+require("ggplot2")
+
+VideoGame <- read_csv("Video_Games_Sales_as_at_22_Dec_2016.csv", col_types = cols(Year_of_Release=col_double()))
+str(VideoGame)
+
+#Highest Publisher sales 1980-1990.
+VideoGame_Filtered1980decade <- filter(VideoGame, Year_of_Release >= 1980, Year_of_Release <= 1989) %>%
+                                group_by(Publisher) %>%
+                                summarise(sum_Global_Sales = sum(Global_Sales))
+  
+View(VideoGame_Filtered1980decade)
+top15VideoGame_Filtered1980decade <- filter(VideoGame_Filtered1980decade, sum_Global_Sales > 1.5)
+View(top15VideoGame_Filtered1980decade)
+
+ggplot(top15VideoGame_Filtered1980decade) +
+  geom_bar(aes(y= reorder(Publisher,sum_Global_Sales), x= sum_Global_Sales, fill=Publisher),stat = "identity")+
+  theme_grey()+
+  labs(x= "Global Sales in Million", y = "Publisher")
+
+#Highest Publisher sales 1990-1999.
+VideoGame_Filtered1990decade <- filter(VideoGame, Year_of_Release >= 1990, Year_of_Release <= 1999) %>% 
+                                group_by(Publisher) %>%  
+                                 summarise(sum_Global_Sales=sum(Global_Sales))
+View(VideoGame_Filtered1990decade)
+top15VideoGame_Filtered1990decade <- filter(VideoGame_Filtered1990decade, sum_Global_Sales > 14)
+View(top15VideoGame_Filtered1990decade)
+
+ggplot(top15VideoGame_Filtered1990decade) +
+  geom_bar(aes(y= reorder(Publisher,sum_Global_Sales), x= sum_Global_Sales, fill=Publisher),stat = "identity")+
+  theme_grey()+
+  labs(x= "Global Sales in Million", y = "Publisher") 
+
+#Highest Publisher sales from 2000 to 2009
+Games_filtered2000_ <- filter(VideoGame, Year_of_Release >= 2000, Year_of_Release <= 2009) %>%
+                        group_by(Publisher) %>%
+                        summarise(sum_Global_Sales=sum(Global_Sales))
+View(Games_filtered2000_)
+top15Games2000_ <- filter(Games_filtered2000_, sum_Global_Sales > 65.96)
+View(top15Games2000_)
+
+ggplot(top15Games2000_, aes(y=reorder(Publisher,sum_Global_Sales), x=sum_Global_Sales)) +
+  geom_point(aes(color=sum_Global_Sales), shape=19, size=3)+
+  scale_color_gradient(low="skyblue", high="purple")+
+  geom_segment(aes(y=Publisher, yend=Publisher, x=0,xend=sum_Global_Sales, color=sum_Global_Sales), 
+               size=1) + 
+  theme(legend.position="top")+
+  labs(y= "Publisher", x= "Global Sales in Millions")+
+  theme_bw()
+
+#Highest Publisher sales from 2010 to 2020
+Games_filtered2010_ <- filter(VideoGame, Year_of_Release >= 2010, Year_of_Release <= 2020) %>%
+  group_by(Publisher) %>%
+  summarise(sum_Global_Sales=sum(Global_Sales))
+View(Games_filtered2010_)
+top15Games2010_ <- filter(Games_filtered2010_, sum_Global_Sales > 48.28)
+View(top15Games2010_)
+
+ggplot(top15Games2010_, aes(x = reorder(Publisher,-sum_Global_Sales), y = sum_Global_Sales , fill = sum_Global_Sales)) + 
+  geom_bar(colour = "black", stat = "identity") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  scale_fill_distiller(palette = "RdYlBu") +
+  scale_y_continuous(expand = c(.02, .02)) + 
+  labs(y= "Global Sales in Million", x = "Publisher") 
+
+#Video Games Critic
+VideoGameafter1993 <- filter(VideoGame, Year_of_Release >= 1993)
+boxplot(VideoGameafter1993$Critic_Score~VideoGameafter1993$Year_of_Release, ylab="Critic Score", xlab="Year of Release", main="Video Game Critic Trends")
+
+#Violent Games
+gh_violence<-filter(VideoGame, Genre %in% c("Action", "Shooter", "Fighting"))
+gh_violenceafter1993 <- filter(gh_violence,Year_of_Release >= 1993)
+View(gh_violenceafter1993)
+boxplot(gh_violenceafter1993$Critic_Score~gh_violenceafter1993$Year_of_Release, ylab="Critic Score", xlab="Year of Release", main="Violent Video Game Critic Trends")
+
+#Non-Violent Games
+gh_nonviolence<-filter(VideoGame, Genre %in% c("Sports", "Racing", "Puzzle", "Simulation", "Strategy"))
+gh_nonviolenceafter1993 <- filter(gh_nonviolence,Year_of_Release >= 1993)
+View(gh_nonviolenceafter1993)
+boxplot(gh_nonviolenceafter1993$Critic_Score~gh_nonviolenceafter1993$Year_of_Release, ylab="Critic Score", xlab="Year of Release", main="Non-violent Video Game Critic Trends")
